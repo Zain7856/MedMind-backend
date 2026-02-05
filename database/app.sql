@@ -7,6 +7,8 @@ CREATE TABLE users (
     Phone VARCHAR(20),
     Role VARCHAR(20) NOT NULL DEFAULT 'Patient' 
 );
+
+
 CREATE TABLE symptoms (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Name VARCHAR(70) NOT NULL,
@@ -70,6 +72,11 @@ CREATE TABLE diseasemedicines (
     FOREIGN KEY(DiseaseID) REFERENCES diseases(ID) ON DELETE CASCADE,
     FOREIGN KEY(MedicineID) REFERENCES medicines(ID) ON DELETE CASCADE
 );
+
+
+
+
+
 
 INSERT INTO users (Name, Email, Password, Age, Phone, Role)
 VALUES (

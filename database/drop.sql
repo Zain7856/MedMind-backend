@@ -8,3 +8,5 @@ DROP TABLE IF EXISTS symptoms;
 DROP TABLE IF EXISTS hospitals;
 DROP TABLE IF EXISTS doctors;
 DROP TABLE IF EXISTS users;
+
+DROP TABLE IF EXISTS symptomtests;
