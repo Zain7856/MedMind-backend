@@ -1,0 +1,23 @@
+{
+  "name": "zain-medical-api",
+  "version": "1.0.0",
+  "description": "Medical management system API with Express and SQLite",
+  "main": "API/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node API/server.js",
+    "dev": "node --watch API/server.js"
+  },
+  "keywords": [
+    "medical",
+    "api",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.2.2"
+  }
+}
