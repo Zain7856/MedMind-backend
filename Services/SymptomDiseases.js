@@ -13,7 +13,7 @@ async function createSymptomDisease(SymptomID, DiseaseID) {
 function getAllSymptomDiseases() {
     const query = db.prepare(`
         SELECT sd.ID, sd.SymptomID, sd.DiseaseID, 
-               s.Name as SymptomName, d.Name as DiseaseName, d.Level 
+               s.Name as SymptomName, d.Name as DiseaseName 
         FROM symptomdiseases sd 
         JOIN symptoms s ON sd.SymptomID = s.ID 
         JOIN diseases d ON sd.DiseaseID = d.ID
@@ -25,7 +25,7 @@ function getAllSymptomDiseases() {
 function getSymptomDiseasesBySymptomId(SymptomID) {
     const query = db.prepare(`
         SELECT sd.ID, sd.SymptomID, sd.DiseaseID, 
-               s.Name as SymptomName, d.Name as DiseaseName, d.Level 
+               s.Name as SymptomName, d.Name as DiseaseName 
         FROM symptomdiseases sd 
         JOIN symptoms s ON sd.SymptomID = s.ID 
         JOIN diseases d ON sd.DiseaseID = d.ID 
@@ -38,7 +38,7 @@ function getSymptomDiseasesBySymptomId(SymptomID) {
 function getSymptomDiseaseById(ID) {
     const query = db.prepare(`
         SELECT sd.ID, sd.SymptomID, sd.DiseaseID, 
-               s.Name as SymptomName, d.Name as DiseaseName, d.Level 
+               s.Name as SymptomName, d.Name as DiseaseName 
         FROM symptomdiseases sd 
         JOIN symptoms s ON sd.SymptomID = s.ID 
         JOIN diseases d ON sd.DiseaseID = d.ID 

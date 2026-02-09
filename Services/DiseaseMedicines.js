@@ -13,7 +13,7 @@ async function createDiseaseMedicine(DiseaseID, MedicineID) {
 function getAllDiseaseMedicines() {
     const query = db.prepare(`
         SELECT dm.ID, dm.DiseaseID, dm.MedicineID, 
-               d.Name as DiseaseName, d.Level, m.Name as MedicineName, m.Price 
+               d.Name as DiseaseName, m.Name as MedicineName, m.Price 
         FROM diseasemedicines dm 
         JOIN diseases d ON dm.DiseaseID = d.ID 
         JOIN medicines m ON dm.MedicineID = m.ID
@@ -25,7 +25,7 @@ function getAllDiseaseMedicines() {
 function getDiseaseMedicinesByDiseaseId(DiseaseID) {
     const query = db.prepare(`
         SELECT dm.ID, dm.DiseaseID, dm.MedicineID, 
-               d.Name as DiseaseName, d.Level, m.Name as MedicineName, m.Price 
+               d.Name as DiseaseName, m.Name as MedicineName, m.Price 
         FROM diseasemedicines dm 
         JOIN diseases d ON dm.DiseaseID = d.ID 
         JOIN medicines m ON dm.MedicineID = m.ID 
@@ -38,7 +38,7 @@ function getDiseaseMedicinesByDiseaseId(DiseaseID) {
 function getDiseaseMedicineById(ID) {
     const query = db.prepare(`
         SELECT dm.ID, dm.DiseaseID, dm.MedicineID, 
-               d.Name as DiseaseName, d.Level, m.Name as MedicineName, m.Price 
+               d.Name as DiseaseName, m.Name as MedicineName, m.Price 
         FROM diseasemedicines dm 
         JOIN diseases d ON dm.DiseaseID = d.ID 
         JOIN medicines m ON dm.MedicineID = m.ID 

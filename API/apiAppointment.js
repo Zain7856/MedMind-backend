@@ -30,7 +30,7 @@ ap.post("/appointments", (req, res) => {
         res.status(201).json({
             message: "Appointment created successfully",
             appointmentId
-        });
+        }); 
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

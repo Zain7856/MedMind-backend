@@ -11,15 +11,15 @@ const ds = express.Router();
 
 ds.post("/diseases", async (req, res) => {
     try {
-        const { Name, Level } = req.body;
+        const { Name, description, symptoms, treatment, img } = req.body;
         
-        if (!Name || !Level) {
+        if (!Name) {
             return res.status(400).json({ 
-                error: "Missing required fields: Name, Level" 
+                error: "Missing required field: Name" 
             });
         }
         
-        const diseaseId = await createdisease(Name, Level);
+        const diseaseId = await createdisease(Name, description, symptoms, treatment, img);
         res.status(201).json({ 
             message: "Disease created successfully", 
             diseaseId 
@@ -38,7 +38,7 @@ ds.get("/diseases", (req, res) => {
     }
 });
 
-ds.get("/diseases/:id", (req, res) => {
+ds.get("/disease/:id", (req, res) => {
     try {
         const { id } = req.params;
         const disease = getdiseaseById(id);
@@ -56,15 +56,15 @@ ds.get("/diseases/:id", (req, res) => {
 ds.put("/diseases/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const { Name, Level } = req.body;
+        const { Name, description, symptoms, treatment, img } = req.body;
         
-        if (!Name || !Level) {
+        if (!Name) {
             return res.status(400).json({ 
-                error: "Missing required fields: Name, Level" 
+                error: "Missing required field: Name" 
             });
         }
         
-        const result = updatedisease(id, Name, Level);
+        const result = updatedisease(id, Name, description, symptoms, treatment, img);
         
         if (result.changes === 0) {
             return res.status(404).json({ error: "Disease not found" });

@@ -3,7 +3,6 @@ import {
     createDoctor,
     getallDoctors,
     getDoctorById,
-    getDoctorByUserId,
     updateDoctor,
     deleteDoctor
 } from "../Services/Doctors.js";
@@ -12,15 +11,15 @@ const dc = express.Router();
 
 dc.post("/doctors", async (req, res) => {
     try {
-        const { UserID, Specialization, Phone } = req.body;
+        const { Name, Img, Specialization, Phone, Location, cost } = req.body;
 
-        if (!UserID || !Specialization) {
+        if (!Name || !Phone || !Location || cost == null) {
             return res.status(400).json({
-                error: "Missing required fields: UserID, Specialization"
+                error: "Missing required fields: Name, Phone, Location, cost"
             });
         }
 
-        const doctorId = await createDoctor(UserID, Specialization, Phone);
+        const doctorId = await createDoctor(Name, Img, Specialization, Phone, Location, cost);
         res.status(201).json({
             message: "Doctor created successfully",
             doctorId
@@ -54,33 +53,18 @@ dc.get("/doctors/:id", (req, res) => {
     }
 });
 
-dc.get("/doctors/user/:userId", (req, res) => {
-    try {
-        const { userId } = req.params;
-        const doctor = getDoctorByUserId(userId);
-
-        if (!doctor) {
-            return res.status(404).json({ error: "Doctor not found" });
-        }
-
-        res.status(200).json(doctor);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 dc.put("/doctors/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const { Specialization, Phone } = req.body;
+        const { Name, Img, Specialization, Phone, Location, cost } = req.body;
 
-        if (!Specialization) {
+        if (!Name || !Phone || !Location || cost == null) {
             return res.status(400).json({
-                error: "Missing required field: Specialization"
+                error: "Missing required fields: Name, Phone, Location, cost"
             });
         }
 
-        const result = updateDoctor(id, Specialization, Phone);
+        const result = updateDoctor(id, Name, Img, Specialization, Phone, Location, cost);
 
         if (result.changes === 0) {
             return res.status(404).json({ error: "Doctor not found" });

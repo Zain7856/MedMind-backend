@@ -11,21 +11,25 @@ import userSymptomsApi from './API/apiUserSymptoms.js';
 import symptomDiseasesApi from './API/apiSymptomDiseases.js';
 import diseaseMedicinesApi from './API/apiDiseaseMedicines.js';
 
+
+import cors from 'cors';
+
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 
-app.use('/api', usersApi);
-app.use('/api', diseasesApi);
-app.use('/api', medicinesApi);
-app.use('/api', appointmentsApi);
-app.use('/api', doctorsApi);
-app.use('/api', hospitalsApi);
-app.use('/api', symptomsApi);
-app.use('/api', userSymptomsApi);
-app.use('/api', symptomDiseasesApi);
-app.use('/api', diseaseMedicinesApi);
+app.use(usersApi);
+app.use(diseasesApi);
+app.use(medicinesApi);
+app.use(appointmentsApi);
+app.use(doctorsApi);
+app.use(hospitalsApi);
+app.use(symptomsApi);
+app.use(userSymptomsApi);
+app.use(symptomDiseasesApi);
+app.use(diseaseMedicinesApi);
 
 
 app.listen(3000, () => {
