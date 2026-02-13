@@ -3,6 +3,7 @@ import {
     createdisease,
     getalldiseases,
     getdiseaseById,
+    getdiseaseByName,
     updatedisease,
     deletedisease
 } from "../Services/Diseases.js";
@@ -41,7 +42,16 @@ ds.get("/diseases", (req, res) => {
 ds.get("/disease/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const disease = getdiseaseById(id);
+        let disease;
+        
+        // Try to parse as integer ID first
+        const numericId = parseInt(id);
+        if (!isNaN(numericId)) {
+            disease = getdiseaseById(numericId);
+        } else {
+            // If not numeric, try to find by name
+            disease = getdiseaseByName(id);
+        }
         
         if (!disease) {
             return res.status(404).json({ error: "Disease not found" });

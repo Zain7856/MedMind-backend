@@ -3,6 +3,7 @@ import {
     createHospital,
     getallHospitals,
     getHospitalById,
+    getHospitalByName,
     updateHospital,
     deleteHospital
 } from "../Services/Hospitals.js";
@@ -41,7 +42,16 @@ hs.get("/hospitals", (req, res) => {
 hs.get("/hospitals/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const hospital = getHospitalById(id);
+        let hospital;
+        
+        // Try to parse as integer ID first
+        const numericId = parseInt(id);
+        if (!isNaN(numericId)) {
+            hospital = getHospitalById(numericId);
+        } else {
+            // If not numeric, try to find by name
+            hospital = getHospitalByName(id);
+        }
         
         if (!hospital) {
             return res.status(404).json({ error: "Hospital not found" });

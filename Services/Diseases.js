@@ -22,6 +22,12 @@ function getdiseaseById(ID) {
     return result;
 }
 
+function getdiseaseByName(Name) {
+    const query = db.prepare("SELECT * FROM diseases WHERE Name = ?");
+    const result = query.get(Name);
+    return result;
+}
+
 function updatedisease(ID, Name, description, symptoms, treatment, img) {
     try {
         const query = db.prepare(
@@ -49,13 +55,11 @@ function deletedisease(ID) {
     }
 }
 
-
-
-
 export {
     createdisease,
     getalldiseases,
     getdiseaseById,
+    getdiseaseByName,
     updatedisease,
     deletedisease
 }
