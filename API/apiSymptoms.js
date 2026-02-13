@@ -65,7 +65,7 @@ sy.put("/symptoms/:id", (req, res) => {
             });
         }
         
-        const result = updatesymptom(Name, Description, id);
+        const result = updatesymptom(id, Name, Description);
         
         if (result.changes === 0) {
             return res.status(404).json({ error: "Symptom not found" });

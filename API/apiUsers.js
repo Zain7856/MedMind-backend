@@ -11,13 +11,54 @@ import {
 
 const router = express.Router();
 
+router.post("/users/login", (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                error: "Missing required fields: email, password"
+            });
+        }
+
+        // Find user by email
+        const user = getuserByEmail(email);
+        if (!user) {
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
+        }
+
+        // Check password (in production, use hashed passwords)
+        if (user.Password !== password) {
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
+        }
+
+        // Return user without password
+        const { Password, ...userWithoutPassword } = user;
+        res.status(200).json(userWithoutPassword);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.post("/users",  (req, res) => {
     try {
         const { Name, Email, Password, Age, Phone, Role } = req.body;
 
         if (!Name || !Email || !Password) {
             return res.status(400).json({
-                error: "Missing required fields: Name, Email, PasswordHash"
+                error: "Missing required fields: Name, Email, Password"
+            });
+        }
+
+        // Check if email already exists
+        const existingUser = getuserByEmail(Email);
+        if (existingUser) {
+            return res.status(409).json({
+                error: "Email already registered"
             });
         }
 

@@ -69,6 +69,12 @@ function deleteuser(ID) {
     }
 }
 
+function loginuser(Email, Password) {
+    const query = db.prepare("SELECT * FROM users WHERE Email = ? AND Password = ?");
+    const result = query.get(Email, Password);
+    return result;
+}
+
 export {
     createuser,
     getallusers,
@@ -76,5 +82,6 @@ export {
     getuserByEmail,
     updateuser,
     updateuserPassword,
-    deleteuser
+    deleteuser,
+    loginuser
 }

@@ -3,6 +3,28 @@ import Database from "better-sqlite3";
 const db = new Database("./database/app.db");
 
 async function createAppointment(UserID, DoctorID, HospitalID, AppointmentDate, Status) {
+    // Validate if User, Doctor, and Hospital exist
+    const userQuery = db.prepare("SELECT ID FROM users WHERE ID = ?");
+    const user = userQuery.get(UserID);
+    
+    const doctorQuery = db.prepare("SELECT ID FROM doctors WHERE ID = ?");
+    const doctor = doctorQuery.get(DoctorID);
+    
+    const hospitalQuery = db.prepare("SELECT ID FROM hospitals WHERE ID = ?");
+    const hospital = hospitalQuery.get(HospitalID);
+    
+    if (!user) {
+        throw new Error(`User with ID ${UserID} does not exist`);
+    }
+    
+    if (DoctorID && !doctor) {
+        throw new Error(`Doctor with ID ${DoctorID} does not exist`);
+    }
+    
+    if (HospitalID && !hospital) {
+        throw new Error(`Hospital with ID ${HospitalID} does not exist`);
+    }
+    
     const query = db.prepare(
         "INSERT INTO appointments (UserID, DoctorID, HospitalID, AppointmentDate, Status) VALUES (?, ?, ?, ?, ?)"
     );
