@@ -6,52 +6,59 @@ import {
     getuserByEmail,
     updateuser,
     updateuserPassword,
-    deleteuser,
-    loginUser
+    deleteuser
 } from "../Services/Users.js";
 
 const router = express.Router();
 
 router.post("/users/login", (req, res) => {
     try {
-        const Email = req.body.Email || req.body.email;
-        const Password = req.body.Password || req.body.password;
+        const { email, password } = req.body;
 
-        if (!Email || !Password) {
+        if (!email || !password) {
             return res.status(400).json({
-                error: "Email and Password are required"
+                error: "Missing required fields: email, password"
             });
         }
 
-        const user = loginUser(Email, Password);
-
+        // Find user by email
+        const user = getuserByEmail(email);
         if (!user) {
-            return res.status(401).json({ error: "Invalid email or password" });
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
         }
 
-        delete user.Password;
+        // Check password (in production, use hashed passwords)
+        if (user.Password !== password) {
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
+        }
 
-        res.status(200).json({
-            message: "Login successful",
-            user
-        });
+        // Return user without password
+        const { Password, ...userWithoutPassword } = user;
+        res.status(200).json(userWithoutPassword);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-router.post("/users", (req, res) => {
+router.post("/users",  (req, res) => {
     try {
-        const Name = req.body.Name || req.body.name;
-        const Email = req.body.Email || req.body.email;
-        const Password = req.body.Password || req.body.password;
-        const Age = req.body.Age || req.body.age;
-        const Phone = req.body.Phone || req.body.phone;
-        const Role = req.body.Role || req.body.role;
+        const { Name, Email, Password, Age, Phone, Role } = req.body;
 
         if (!Name || !Email || !Password) {
             return res.status(400).json({
                 error: "Missing required fields: Name, Email, Password"
+            });
+        }
+
+        // Check if email already exists
+        const existingUser = getuserByEmail(Email);
+        if (existingUser) {
+            return res.status(409).json({
+                error: "Email already registered"
             });
         }
 
@@ -60,7 +67,7 @@ router.post("/users", (req, res) => {
             message: "User created successfully",
             userId
         });
-    }
+    } 
 
     catch (error) {
         res.status(500).json({ error: error.message });
@@ -140,15 +147,15 @@ router.put("/users/:id", (req, res) => {
 router.put("/users/:id/password", (req, res) => {
     try {
         const { id } = req.params;
-        const { Password } = req.body;
+        const { PasswordHash } = req.body;
 
-        if (!Password) {
+        if (!PasswordHash) {
             return res.status(400).json({
-                error: "Missing required field: Password"
+                error: "Missing required field: PasswordHash"
             });
         }
 
-        const result = updateuserPassword(id, Password);
+        const result = updateuserPassword(id, PasswordHash);
 
         if (result.changes === 0) {
             return res.status(404).json({ error: "User not found" });

@@ -22,6 +22,12 @@ function getHospitalById(ID) {
     return result;
 }
 
+function getHospitalByName(Name) {
+    const query = db.prepare("SELECT * FROM hospitals WHERE Name = ?");
+    const result = query.get(Name);
+    return result;
+}
+
 function updateHospital(ID, Name, Location, Phone) {
     try {
         const query = db.prepare(
@@ -55,6 +61,7 @@ export {
     createHospital,
     getallHospitals,
     getHospitalById,
+    getHospitalByName,
     updateHospital,
     deleteHospital
 }

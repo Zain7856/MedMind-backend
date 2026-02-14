@@ -49,7 +49,7 @@ function updateuserPassword(ID, Password) {
         );
         const result = query.run(Password, ID);
         console.log(`Updated password for user with ID: ${ID}`);
-
+        
         return result;
     } catch (error) {
         console.error("Error updating password:", error.message);
@@ -69,9 +69,9 @@ function deleteuser(ID) {
     }
 }
 
-function loginUser(email, password) {
+function loginuser(Email, Password) {
     const query = db.prepare("SELECT * FROM users WHERE Email = ? AND Password = ?");
-    const result = query.get(email, password);
+    const result = query.get(Email, Password);
     return result;
 }
 
@@ -83,5 +83,5 @@ export {
     updateuser,
     updateuserPassword,
     deleteuser,
-    loginUser
+    loginuser
 }
