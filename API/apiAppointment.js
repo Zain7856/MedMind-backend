@@ -1,22 +1,17 @@
 import express from "express";
-import Database from "better-sqlite3";
+import db from "../Services/db.js";
 import {
     createAppointment,
     getallAppointments,
     getAppointmentById,
+    getAppointmentsByDoctorUserId,
+    getAppointmentsByHospitalUserId,
     updateAppointment,
+    updateAppointmentStatus,
     deleteAppointment
 } from "../Services/Appointments.js";
 
-const db = new Database("./database/app.db");
 const ap = express.Router();
-
-
-
-
-
-
-
 
 ap.post("/appointments", async (req, res) => {
     try {
@@ -38,9 +33,7 @@ ap.post("/appointments", async (req, res) => {
         // Handle email as UserID - convert to numeric ID
         let userIdNumeric;
         if (isNaN(UserID)) {
-            // UserID is an email, look up the numeric ID
-            const userQuery = db.prepare("SELECT ID FROM users WHERE Email = ?");
-            const user = userQuery.get(UserID);
+            const user = db.prepare("SELECT ID FROM users WHERE Email = ?").get(UserID);
             if (!user) {
                 return res.status(400).json({
                     error: "User not found with this email"
@@ -51,7 +44,6 @@ ap.post("/appointments", async (req, res) => {
             userIdNumeric = UserID;
         }
 
-        // Set default status if not provided
         const appointmentStatus = Status || 'Pending';
         
         try {
@@ -76,10 +68,6 @@ ap.post("/appointments", async (req, res) => {
     }
 });
 
-
-
-
-
 ap.get("/appointments", (req, res) => {
     try {
         const appointments = getallAppointments();
@@ -89,12 +77,25 @@ ap.get("/appointments", (req, res) => {
     }
 });
 
+ap.get("/appointments/doctor/:doctorUserId", (req, res) => {
+    try {
+        const { doctorUserId } = req.params;
+        const appointments = getAppointmentsByDoctorUserId(doctorUserId);
+        res.status(200).json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-
-
-
-
-
+ap.get("/appointments/hospital/:hospitalUserId", (req, res) => {
+    try {
+        const { hospitalUserId } = req.params;
+        const appointments = getAppointmentsByHospitalUserId(hospitalUserId);
+        res.status(200).json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 ap.get("/appointments/:id", (req, res) => {
     try {
@@ -111,29 +112,39 @@ ap.get("/appointments/:id", (req, res) => {
     }
 });
 
+ap.patch("/appointments/:id/status", (req, res) => {
+    try {
+        const { id } = req.params;
+        const { Status } = req.body;
 
+        if (!Status) {
+            return res.status(400).json({ error: "Missing required field: Status" });
+        }
 
+        const result = updateAppointmentStatus(id, Status);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "Appointment not found" });
+        }
 
-
-
-
-
-
+        res.status(200).json({ message: "Appointment status updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 ap.put("/appointments/:id", (req, res) => {
     try {
         const { id } = req.params;
         const { UserID, DoctorID, HospitalID, AppointmentDate, Status } = req.body;
 
-        if (!UserID || !DoctorID || !HospitalID || !AppointmentDate) {
+        if (!UserID || !AppointmentDate) {
             return res.status(400).json({
-                error: "Missing required fields: UserID, DoctorID, HospitalID, AppointmentDate"
+                error: "Missing required fields: UserID, AppointmentDate"
             });
         }
 
-        // Set default status if not provided
         const appointmentStatus = Status || 'Pending';
-        const result = updateAppointment(id, UserID, DoctorID, HospitalID, AppointmentDate, appointmentStatus);
+        const result = updateAppointment(id, UserID, DoctorID || null, HospitalID || null, AppointmentDate, appointmentStatus);
 
         if (result.changes === 0) {
             return res.status(404).json({ error: "Appointment not found" });
@@ -147,19 +158,6 @@ ap.put("/appointments/:id", (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ap.delete("/appointments/:id", (req, res) => {
     try {
@@ -179,10 +177,4 @@ ap.delete("/appointments/:id", (req, res) => {
     }
 });
 
-
-
-
-
-
 export default ap;
-

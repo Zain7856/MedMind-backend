@@ -1,12 +1,10 @@
-import Database from "better-sqlite3";
+import db from "./db.js";
 
-const db = new Database("./database/app.db");
-
-async function createHospital(Name, Location, Phone) {
+async function createHospital(UserID, Name, Location, Phone, img, Services) {
     const query = db.prepare(
-        "INSERT INTO hospitals (Name,Location,Phone) VALUES (?, ?, ?)"
+        "INSERT INTO hospitals (UserID, Name, Location, Phone, img, Services) VALUES (?, ?, ?, ?, ?, ?)"
     );
-    const result = query.run(Name, Location, Phone);
+    const result = query.run(UserID || null, Name, Location || null, Phone || null, img || null, Services || null);
     return result.lastInsertRowid;
 }
 
@@ -28,12 +26,27 @@ function getHospitalByName(Name) {
     return result;
 }
 
-function updateHospital(ID, Name, Location, Phone) {
+function getHospitalByUserId(UserID) {
+    const query = db.prepare("SELECT * FROM hospitals WHERE UserID = ?");
+    const result = query.get(UserID);
+    return result;
+}
+
+function upsertHospitalProfile(UserID, Name, Location, Phone, img, Services) {
+    const existing = getHospitalByUserId(UserID);
+    if (existing) {
+        return updateHospital(existing.ID, Name, Location, Phone, img, Services);
+    } else {
+        return createHospital(UserID, Name, Location, Phone, img, Services);
+    }
+}
+
+function updateHospital(ID, Name, Location, Phone, img, Services) {
     try {
         const query = db.prepare(
-            "UPDATE hospitals SET Name = ?, Location = ?, Phone = ? WHERE ID = ?"
+            "UPDATE hospitals SET Name = ?, Location = ?, Phone = ?, img = ?, Services = ? WHERE ID = ?"
         );
-        const result = query.run(Name, Location, Phone, ID);
+        const result = query.run(Name, Location, Phone, img || null, Services || null, ID);
         console.log(`Updated hospital with ID: ${ID}`);
         return result;
     } catch (error) {
@@ -41,9 +54,9 @@ function updateHospital(ID, Name, Location, Phone) {
         throw error;
     }
 }
+
 function deleteHospital(ID) {
     try {
-        // Foreign key constraints with ON DELETE CASCADE will handle related records
         const query = db.prepare("DELETE FROM hospitals WHERE ID = ?");
         const result = query.run(ID);
         console.log(`Deleted hospital with ID: ${ID}`);
@@ -54,14 +67,13 @@ function deleteHospital(ID) {
     }
 }
 
-
-
-
 export {
     createHospital,
     getallHospitals,
     getHospitalById,
     getHospitalByName,
+    getHospitalByUserId,
+    upsertHospitalProfile,
     updateHospital,
     deleteHospital
 }

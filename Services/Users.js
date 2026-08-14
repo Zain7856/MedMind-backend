@@ -1,12 +1,10 @@
-import Database from "better-sqlite3";
+import db from "./db.js";
 
-const db = new Database("./database/app.db");
-
-function createuser(Name, Email, Password, Age, Phone, Role) {
+function createuser(Name, Email, Password, Age, Phone, Role, ApprovalStatus = 'Pending') {
     const query = db.prepare(
-        "INSERT INTO users (Name, Email, Password, Age, Phone, Role) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO users (Name, Email, Password, Age, Phone, Role, ApprovalStatus, IsBanned) VALUES (?, ?, ?, ?, ?, ?, ?, 0)"
     );
-    const result = query.run(Name, Email, Password, Age, Phone, Role);
+    const result = query.run(Name, Email, Password, Age || null, Phone || null, Role || 'Patient', ApprovalStatus);
     return result.lastInsertRowid;
 }
 
@@ -19,6 +17,12 @@ function getallusers() {
 function getuserById(ID) {
     const query = db.prepare("SELECT * FROM users WHERE ID = ?");
     const result = query.get(ID);
+    return result;
+}
+
+function getuserbyage(Age) {
+    const query = db.prepare("SELECT * FROM users WHERE Age >= ?");
+    const result = query.all(Age);
     return result;
 }
 
@@ -42,6 +46,41 @@ function updateuser(ID, Name, Email, Age, Phone, Role) {
     }
 }
 
+function updateUserStatus(ID, ApprovalStatus) {
+    try {
+        const query = db.prepare(
+            "UPDATE users SET ApprovalStatus = ? WHERE ID = ?"
+        );
+        const result = query.run(ApprovalStatus, ID);
+        console.log(`Updated user approval status to ${ApprovalStatus} for ID: ${ID}`);
+        return result;
+    } catch (error) {
+        console.error("Error updating user approval status:", error.message);
+        throw error;
+    }
+}
+
+function updateUserBanned(ID, IsBanned) {
+    try {
+        // When banning, cancel all active appointments automatically
+        const result = db.transaction(() => {
+            const updateBan = db.prepare("UPDATE users SET IsBanned = ? WHERE ID = ?");
+            const banRes = updateBan.run(IsBanned, ID);
+            
+            if (IsBanned === 1) {
+                const cancelAppointments = db.prepare("UPDATE appointments SET Status = 'Cancelled' WHERE UserID = ? AND Status = 'Pending'");
+                cancelAppointments.run(ID);
+            }
+            return banRes;
+        })();
+        console.log(`Updated user banned status to ${IsBanned} for ID: ${ID}`);
+        return result;
+    } catch (error) {
+        console.error("Error updating user banned status:", error.message);
+        throw error;
+    }
+}
+
 function updateuserPassword(ID, Password) {
     try {
         const query = db.prepare(
@@ -49,7 +88,6 @@ function updateuserPassword(ID, Password) {
         );
         const result = query.run(Password, ID);
         console.log(`Updated password for user with ID: ${ID}`);
-        
         return result;
     } catch (error) {
         console.error("Error updating password:", error.message);
@@ -81,6 +119,8 @@ export {
     getuserById,
     getuserByEmail,
     updateuser,
+    updateUserStatus,
+    updateUserBanned,
     updateuserPassword,
     deleteuser,
     loginuser

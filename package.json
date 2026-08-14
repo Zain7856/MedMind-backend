@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "db:migrate": "node -e \"import('./database/migrate.js').then(m => m.checkAndMigrate())\"",
+    "db:reset": "node database/reset.js"
   },
   "keywords": [
     "medical",

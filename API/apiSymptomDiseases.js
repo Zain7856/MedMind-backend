@@ -19,10 +19,14 @@ router.post("/symptomdiseases", async (req, res) => {
             });
         }
 
-        const id = await createSymptomDisease(SymptomID, DiseaseID);
+        const changes = await createSymptomDisease(SymptomID, DiseaseID);
+        if (changes === 0) {
+            return res.status(409).json({ error: "Symptom disease link already exists" });
+        }
         res.status(201).json({
             message: "Symptom disease created successfully",
-            id
+            SymptomID,
+            DiseaseID
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -38,13 +42,13 @@ router.get("/symptomdiseases", (req, res) => {
     }
 });
 
-router.get("/symptomdiseases/:id", (req, res) => {
+router.get("/symptomdiseases/symptom/:symptomId/disease/:diseaseId", (req, res) => {
     try {
-        const { id } = req.params;
-        const symptomDisease = getSymptomDiseaseById(id);
+        const { symptomId, diseaseId } = req.params;
+        const symptomDisease = getSymptomDiseaseById(symptomId, diseaseId);
 
         if (!symptomDisease) {
-            return res.status(404).json({ error: "Symptom disease not found" });
+            return res.status(404).json({ error: "Symptom disease link not found" });
         }
 
         res.status(200).json(symptomDisease);
@@ -63,13 +67,13 @@ router.get("/symptomdiseases/symptom/:symptomId", (req, res) => {
     }
 });
 
-router.delete("/symptomdiseases/:id", (req, res) => {
+router.delete("/symptomdiseases/symptom/:symptomId/disease/:diseaseId", (req, res) => {
     try {
-        const { id } = req.params;
-        const result = deleteSymptomDisease(id);
+        const { symptomId, diseaseId } = req.params;
+        const result = deleteSymptomDisease(symptomId, diseaseId);
 
         if (result.changes === 0) {
-            return res.status(404).json({ error: "Symptom disease not found" });
+            return res.status(404).json({ error: "Symptom disease link not found" });
         }
 
         res.status(200).json({

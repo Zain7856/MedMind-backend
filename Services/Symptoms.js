@@ -1,6 +1,4 @@
-import Database from "better-sqlite3";
-
-const db = new Database("./database/app.db");
+import db from "./db.js";
 
 async function createsymptom(Name, Description) {
     const query = db.prepare(

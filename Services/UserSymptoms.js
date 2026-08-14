@@ -1,18 +1,16 @@
-import Database from "better-sqlite3";
-
-const db = new Database("./database/app.db");
+import db from "./db.js";
 
 async function createUserSymptom(UserID, SymptomID) {
     const query = db.prepare(
-        "INSERT INTO usersymptoms (UserID, SymptomID) VALUES (?, ?)"
+        "INSERT OR IGNORE INTO usersymptoms (UserID, SymptomID) VALUES (?, ?)"
     );
     const result = query.run(UserID, SymptomID);
-    return result.lastInsertRowid;
+    return result.changes;
 }
 
 function getAllUserSymptoms() {
     const query = db.prepare(`
-        SELECT us.ID, us.UserID, us.SymptomID, 
+        SELECT us.UserID, us.SymptomID, 
                u.Name as UserName, s.Name as SymptomName 
         FROM usersymptoms us 
         JOIN users u ON us.UserID = u.ID 
@@ -24,7 +22,7 @@ function getAllUserSymptoms() {
 
 function getUserSymptomsByUserId(UserID) {
     const query = db.prepare(`
-        SELECT us.ID, us.UserID, us.SymptomID, 
+        SELECT us.UserID, us.SymptomID, 
                u.Name as UserName, s.Name as SymptomName, s.Description 
         FROM usersymptoms us 
         JOIN users u ON us.UserID = u.ID 
@@ -35,24 +33,24 @@ function getUserSymptomsByUserId(UserID) {
     return result;
 }
 
-function getUserSymptomById(ID) {
+function getUserSymptomById(UserID, SymptomID) {
     const query = db.prepare(`
-        SELECT us.ID, us.UserID, us.SymptomID, 
+        SELECT us.UserID, us.SymptomID, 
                u.Name as UserName, s.Name as SymptomName, s.Description 
         FROM usersymptoms us 
         JOIN users u ON us.UserID = u.ID 
         JOIN symptoms s ON us.SymptomID = s.ID 
-        WHERE us.ID = ?
+        WHERE us.UserID = ? AND us.SymptomID = ?
     `);
-    const result = query.get(ID);
+    const result = query.get(UserID, SymptomID);
     return result;
 }
 
-function deleteUserSymptom(ID) {
+function deleteUserSymptom(UserID, SymptomID) {
     try {
-        const query = db.prepare("DELETE FROM usersymptoms WHERE ID = ?");
-        const result = query.run(ID);
-        console.log(`Deleted user symptom with ID: ${ID}`);
+        const query = db.prepare("DELETE FROM usersymptoms WHERE UserID = ? AND SymptomID = ?");
+        const result = query.run(UserID, SymptomID);
+        console.log(`Deleted user symptom link: User ${UserID}, Symptom ${SymptomID}`);
         return result;
     } catch (error) {
         console.error("Error deleting user symptom:", error.message);

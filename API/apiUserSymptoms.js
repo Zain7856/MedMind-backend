@@ -19,10 +19,14 @@ router.post("/usersymptoms", async (req, res) => {
             });
         }
 
-        const id = await createUserSymptom(UserID, SymptomID);
+        const changes = await createUserSymptom(UserID, SymptomID);
+        if (changes === 0) {
+            return res.status(409).json({ error: "Symptom link already exists" });
+        }
         res.status(201).json({
             message: "User symptom created successfully",
-            id
+            UserID,
+            SymptomID
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -38,13 +42,13 @@ router.get("/usersymptoms", (req, res) => {
     }
 });
 
-router.get("/usersymptoms/:id", (req, res) => {
+router.get("/usersymptoms/user/:userId/symptom/:symptomId", (req, res) => {
     try {
-        const { id } = req.params;
-        const userSymptom = getUserSymptomById(id);
+        const { userId, symptomId } = req.params;
+        const userSymptom = getUserSymptomById(userId, symptomId);
 
         if (!userSymptom) {
-            return res.status(404).json({ error: "User symptom not found" });
+            return res.status(404).json({ error: "User symptom link not found" });
         }
 
         res.status(200).json(userSymptom);
@@ -63,13 +67,13 @@ router.get("/usersymptoms/user/:userId", (req, res) => {
     }
 });
 
-router.delete("/usersymptoms/:id", (req, res) => {
+router.delete("/usersymptoms/user/:userId/symptom/:symptomId", (req, res) => {
     try {
-        const { id } = req.params;
-        const result = deleteUserSymptom(id);
+        const { userId, symptomId } = req.params;
+        const result = deleteUserSymptom(userId, symptomId);
 
         if (result.changes === 0) {
-            return res.status(404).json({ error: "User symptom not found" });
+            return res.status(404).json({ error: "User symptom link not found" });
         }
 
         res.status(200).json({

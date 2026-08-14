@@ -5,9 +5,13 @@ import {
     getuserById,
     getuserByEmail,
     updateuser,
+    updateUserStatus,
+    updateUserBanned,
     updateuserPassword,
     deleteuser
 } from "../Services/Users.js";
+import { createDoctor } from "../Services/Doctors.js";
+import { createHospital } from "../Services/Hospitals.js";
 
 const router = express.Router();
 
@@ -36,6 +40,27 @@ router.post("/users/login", (req, res) => {
             });
         }
 
+        // Check if user is banned
+        if (user.IsBanned === 1) {
+            return res.status(403).json({
+                error: "Your account has been banned by the Admin."
+            });
+        }
+
+        // Check if user is pending approval
+        if (user.ApprovalStatus === 'Pending') {
+            return res.status(403).json({
+                error: "Your account is pending Admin approval."
+            });
+        }
+
+        // Check if user is rejected
+        if (user.ApprovalStatus === 'Rejected') {
+            return res.status(403).json({
+                error: "Your account registration was rejected."
+            });
+        }
+
         // Return user without password
         const { Password, ...userWithoutPassword } = user;
         res.status(200).json(userWithoutPassword);
@@ -44,7 +69,7 @@ router.post("/users/login", (req, res) => {
     }
 });
 
-router.post("/users",  (req, res) => {
+router.post("/users", async (req, res) => {
     try {
         const { Name, Email, Password, Age, Phone, Role } = req.body;
 
@@ -62,22 +87,27 @@ router.post("/users",  (req, res) => {
             });
         }
 
-        const userId = createuser(Name, Email, Password, Age, Phone, Role);
+        // Default approval status is 'Pending' for all users (Admin can be manually seeded/configured)
+        const userId = createuser(Name, Email, Password, Age, Phone, Role, "Pending");
+
+        // Insert role-specific profile details if specified
+        if (Role === 'Doctor') {
+            const { Specialization, Location, cost, About, Img } = req.body;
+            let costNum = cost ? parseFloat(cost) : null;
+            await createDoctor(userId, Name, Img || null, Specialization || null, Phone || null, Location || null, costNum, About || null);
+        } else if (Role === 'Hospital') {
+            const { Location, img, Services } = req.body;
+            await createHospital(userId, Name, Location || null, Phone || null, img || null, Services || null);
+        }
+
         res.status(201).json({
-            message: "User created successfully",
+            message: "User created successfully with status Pending",
             userId
         });
-    } 
-
-    catch (error) {
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
-
-
-
-
 
 router.get("/users", (req, res) => {
     try {
@@ -188,5 +218,57 @@ router.delete("/users/:id", (req, res) => {
     }
 });
 
-export default router;
+// Admin Approval & Moderation Endpoints
+router.patch("/admin/users/:id/approve", (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = updateUserStatus(id, 'Approved');
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json({ message: "User account approved successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
+router.patch("/admin/users/:id/reject", (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = updateUserStatus(id, 'Rejected');
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json({ message: "User account rejected successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.patch("/admin/users/:id/ban", (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = updateUserBanned(id, 1);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json({ message: "User has been banned and pending appointments cancelled" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.patch("/admin/users/:id/unban", (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = updateUserBanned(id, 0);
+        if (result.changes === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.status(200).json({ message: "User has been unbanned successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+export default router;

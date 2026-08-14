@@ -3,6 +3,8 @@ import {
     createDoctor,
     getallDoctors,
     getDoctorById,
+    getDoctorByUserId,
+    upsertDoctorProfile,
     updateDoctor,
     deleteDoctor
 } from "../Services/Doctors.js";
@@ -11,7 +13,7 @@ const dc = express.Router();
 
 dc.post("/doctors", async (req, res) => {
     try {
-        const { Name, Img, Specialization, Phone, Location, cost } = req.body;
+        const { UserID, Name, Img, Specialization, Phone, Location, cost, About } = req.body;
 
         if (!Name || !Phone || !Location || cost == null) {
             return res.status(400).json({
@@ -19,7 +21,7 @@ dc.post("/doctors", async (req, res) => {
             });
         }
 
-        const doctorId = await createDoctor(Name, Img, Specialization, Phone, Location, cost);
+        const doctorId = await createDoctor(UserID || null, Name, Img, Specialization, Phone, Location, cost, About);
         res.status(201).json({
             message: "Doctor created successfully",
             doctorId
@@ -53,10 +55,44 @@ dc.get("/doctors/:id", (req, res) => {
     }
 });
 
+dc.get("/doctors/user/:userId", (req, res) => {
+    try {
+        const { userId } = req.params;
+        const doctor = getDoctorByUserId(userId);
+
+        if (!doctor) {
+            return res.status(404).json({ error: "Doctor profile not found for this user" });
+        }
+
+        res.status(200).json(doctor);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+dc.put("/doctors/user/:userId", (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { Name, Img, Specialization, Phone, Location, cost, About } = req.body;
+
+        if (!Name) {
+            return res.status(400).json({ error: "Missing required field: Name" });
+        }
+
+        const result = upsertDoctorProfile(userId, Name, Img || null, Specialization || null, Phone || null, Location || null, cost || 0, About || null);
+        res.status(200).json({
+            message: "Doctor profile saved successfully",
+            result
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 dc.put("/doctors/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const { Name, Img, Specialization, Phone, Location, cost } = req.body;
+        const { Name, Img, Specialization, Phone, Location, cost, About } = req.body;
 
         if (!Name || !Phone || !Location || cost == null) {
             return res.status(400).json({
@@ -64,7 +100,7 @@ dc.put("/doctors/:id", (req, res) => {
             });
         }
 
-        const result = updateDoctor(id, Name, Img, Specialization, Phone, Location, cost);
+        const result = updateDoctor(id, Name, Img, Specialization, Phone, Location, cost, About);
 
         if (result.changes === 0) {
             return res.status(404).json({ error: "Doctor not found" });

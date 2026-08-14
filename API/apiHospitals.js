@@ -4,6 +4,8 @@ import {
     getallHospitals,
     getHospitalById,
     getHospitalByName,
+    getHospitalByUserId,
+    upsertHospitalProfile,
     updateHospital,
     deleteHospital
 } from "../Services/Hospitals.js";
@@ -12,7 +14,7 @@ const hs = express.Router();
 
 hs.post("/hospitals", async (req, res) => {
     try {
-        const { Name, Location, Phone } = req.body;
+        const { UserID, Name, Location, Phone, img, Services } = req.body;
         
         if (!Name || !Location || !Phone) {
             return res.status(400).json({ 
@@ -20,7 +22,7 @@ hs.post("/hospitals", async (req, res) => {
             });
         }
         
-        const hospitalId = await createHospital(Name, Location, Phone);
+        const hospitalId = await createHospital(UserID || null, Name, Location, Phone, img, Services);
         res.status(201).json({ 
             message: "Hospital created successfully", 
             hospitalId 
@@ -39,17 +41,49 @@ hs.get("/hospitals", (req, res) => {
     }
 });
 
+hs.get("/hospitals/user/:userId", (req, res) => {
+    try {
+        const { userId } = req.params;
+        const hospital = getHospitalByUserId(userId);
+
+        if (!hospital) {
+            return res.status(404).json({ error: "Hospital profile not found for this user" });
+        }
+
+        res.status(200).json(hospital);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+hs.put("/hospitals/user/:userId", (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { Name, Location, Phone, img, Services } = req.body;
+
+        if (!Name) {
+            return res.status(400).json({ error: "Missing required field: Name" });
+        }
+
+        const result = upsertHospitalProfile(userId, Name, Location || null, Phone || null, img || null, Services || null);
+        res.status(200).json({
+            message: "Hospital profile saved successfully",
+            result
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 hs.get("/hospitals/:id", (req, res) => {
     try {
         const { id } = req.params;
         let hospital;
         
-        // Try to parse as integer ID first
         const numericId = parseInt(id);
         if (!isNaN(numericId)) {
             hospital = getHospitalById(numericId);
         } else {
-            // If not numeric, try to find by name
             hospital = getHospitalByName(id);
         }
         
@@ -66,7 +100,7 @@ hs.get("/hospitals/:id", (req, res) => {
 hs.put("/hospitals/:id", (req, res) => {
     try {
         const { id } = req.params;
-        const { Name, Location, Phone } = req.body;
+        const { Name, Location, Phone, img, Services } = req.body;
         
         if (!Name || !Location || !Phone) {
             return res.status(400).json({ 
@@ -74,7 +108,7 @@ hs.put("/hospitals/:id", (req, res) => {
             });
         }
         
-        const result = updateHospital(id, Name, Location, Phone);
+        const result = updateHospital(id, Name, Location, Phone, img, Services);
         
         if (result.changes === 0) {
             return res.status(404).json({ error: "Hospital not found" });
@@ -108,4 +142,3 @@ hs.delete("/hospitals/:id", (req, res) => {
 });
 
 export default hs;
-

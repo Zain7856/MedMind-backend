@@ -1,5 +1,6 @@
 
 import express from 'express';
+import { checkAndMigrate } from './database/migrate.js';
 import usersApi from './API/apiUsers.js';
 import diseasesApi from './API/apiDisease.js';
 import appointmentsApi from './API/apiAppointment.js';
@@ -9,9 +10,11 @@ import symptomsApi from './API/apiSymptoms.js';
 import userSymptomsApi from './API/apiUserSymptoms.js';
 import symptomDiseasesApi from './API/apiSymptomDiseases.js';
 import chatApi from './API/apiChat.js';
-
-
 import cors from 'cors';
+
+// Initialize and normalize database if needed on startup
+checkAndMigrate();
+
 
 const app = express();
 
