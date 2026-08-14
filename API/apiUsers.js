@@ -40,7 +40,6 @@ router.post("/users/login", (req, res) => {
             });
         }
 
-<<<<<<< HEAD
         // Check if user is banned
         if (user.IsBanned === 1) {
             return res.status(403).json({
@@ -62,8 +61,6 @@ router.post("/users/login", (req, res) => {
             });
         }
 
-=======
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
         // Return user without password
         const { Password, ...userWithoutPassword } = user;
         res.status(200).json(userWithoutPassword);
@@ -72,28 +69,13 @@ router.post("/users/login", (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 router.post("/users", async (req, res) => {
-=======
-router.post("/users",  (req, res) => {
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     try {
         const { Name, Email, Password, Age, Phone, Role } = req.body;
 
         if (!Name || !Email || !Password) {
             return res.status(400).json({
                 error: "Missing required fields: Name, Email, Password"
-<<<<<<< HEAD
-=======
-            });
-        }
-
-        // Check if email already exists
-        const existingUser = getuserByEmail(Email);
-        if (existingUser) {
-            return res.status(409).json({
-                error: "Email already registered"
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
             });
         }
 

@@ -1,28 +1,14 @@
 import db from "./db.js";
 
 async function createAppointment(UserID, DoctorID, HospitalID, AppointmentDate, Status) {
-<<<<<<< HEAD
     // Validate if User exists
     const userQuery = db.prepare("SELECT ID FROM users WHERE ID = ?");
     const user = userQuery.get(UserID);
     
-=======
-    // Validate if User, Doctor, and Hospital exist
-    const userQuery = db.prepare("SELECT ID FROM users WHERE ID = ?");
-    const user = userQuery.get(UserID);
-    
-    const doctorQuery = db.prepare("SELECT ID FROM doctors WHERE ID = ?");
-    const doctor = doctorQuery.get(DoctorID);
-    
-    const hospitalQuery = db.prepare("SELECT ID FROM hospitals WHERE ID = ?");
-    const hospital = hospitalQuery.get(HospitalID);
-    
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     if (!user) {
         throw new Error(`User with ID ${UserID} does not exist`);
     }
     
-<<<<<<< HEAD
     // Validate Doctor only if DoctorID is provided
     if (DoctorID) {
         const doctorQuery = db.prepare("SELECT ID FROM doctors WHERE ID = ?");
@@ -41,14 +27,6 @@ async function createAppointment(UserID, DoctorID, HospitalID, AppointmentDate, 
         if (!hospital) {
             throw new Error(`Hospital with ID ${HospitalID} does not exist`);
         }
-=======
-    if (DoctorID && !doctor) {
-        throw new Error(`Doctor with ID ${DoctorID} does not exist`);
-    }
-    
-    if (HospitalID && !hospital) {
-        throw new Error(`Hospital with ID ${HospitalID} does not exist`);
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     }
     
     const query = db.prepare(

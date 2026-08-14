@@ -62,7 +62,6 @@ function getdiseaseById(ID) {
 }
 
 function getdiseaseByName(Name) {
-<<<<<<< HEAD
     const query = db.prepare(`
         SELECT d.ID, d.Name, d.description, d.treatment, d.img,
                GROUP_CONCAT(s.Name, ', ') AS symptoms
@@ -72,9 +71,6 @@ function getdiseaseByName(Name) {
         WHERE LOWER(d.Name) = LOWER(?)
         GROUP BY d.ID
     `);
-=======
-    const query = db.prepare("SELECT * FROM diseases WHERE Name = ?");
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     const result = query.get(Name);
     return result;
 }

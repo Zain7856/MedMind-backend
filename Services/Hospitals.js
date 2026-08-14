@@ -26,7 +26,6 @@ function getHospitalByName(Name) {
     return result;
 }
 
-<<<<<<< HEAD
 function getHospitalByUserId(UserID) {
     const query = db.prepare("SELECT * FROM hospitals WHERE UserID = ?");
     const result = query.get(UserID);
@@ -43,9 +42,6 @@ function upsertHospitalProfile(UserID, Name, Location, Phone, img, Services) {
 }
 
 function updateHospital(ID, Name, Location, Phone, img, Services) {
-=======
-function updateHospital(ID, Name, Location, Phone) {
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     try {
         const query = db.prepare(
             "UPDATE hospitals SET Name = ?, Location = ?, Phone = ?, img = ?, Services = ? WHERE ID = ?"
@@ -76,11 +72,8 @@ export {
     getallHospitals,
     getHospitalById,
     getHospitalByName,
-<<<<<<< HEAD
     getHospitalByUserId,
     upsertHospitalProfile,
-=======
->>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     updateHospital,
     deleteHospital
 }
