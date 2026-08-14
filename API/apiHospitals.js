@@ -4,8 +4,11 @@ import {
     getallHospitals,
     getHospitalById,
     getHospitalByName,
+<<<<<<< HEAD
     getHospitalByUserId,
     upsertHospitalProfile,
+=======
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
     updateHospital,
     deleteHospital
 } from "../Services/Hospitals.js";
@@ -80,10 +83,18 @@ hs.get("/hospitals/:id", (req, res) => {
         const { id } = req.params;
         let hospital;
         
+<<<<<<< HEAD
+=======
+        // Try to parse as integer ID first
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
         const numericId = parseInt(id);
         if (!isNaN(numericId)) {
             hospital = getHospitalById(numericId);
         } else {
+<<<<<<< HEAD
+=======
+            // If not numeric, try to find by name
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
             hospital = getHospitalByName(id);
         }
         

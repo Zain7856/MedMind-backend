@@ -1,5 +1,9 @@
 import express from "express";
+<<<<<<< HEAD
 import db from "../Services/db.js";
+=======
+import Database from "better-sqlite3";
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
 import {
     createAppointment,
     getallAppointments,
@@ -11,8 +15,19 @@ import {
     deleteAppointment
 } from "../Services/Appointments.js";
 
+const db = new Database("./database/app.db");
 const ap = express.Router();
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
 ap.post("/appointments", async (req, res) => {
     try {
         const { UserID, DoctorID, HospitalID, AppointmentDate, Status } = req.body;
@@ -33,7 +48,13 @@ ap.post("/appointments", async (req, res) => {
         // Handle email as UserID - convert to numeric ID
         let userIdNumeric;
         if (isNaN(UserID)) {
+<<<<<<< HEAD
             const user = db.prepare("SELECT ID FROM users WHERE Email = ?").get(UserID);
+=======
+            // UserID is an email, look up the numeric ID
+            const userQuery = db.prepare("SELECT ID FROM users WHERE Email = ?");
+            const user = userQuery.get(UserID);
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
             if (!user) {
                 return res.status(400).json({
                     error: "User not found with this email"
@@ -44,6 +65,10 @@ ap.post("/appointments", async (req, res) => {
             userIdNumeric = UserID;
         }
 
+<<<<<<< HEAD
+=======
+        // Set default status if not provided
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
         const appointmentStatus = Status || 'Pending';
         
         try {
@@ -68,6 +93,13 @@ ap.post("/appointments", async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
 ap.get("/appointments", (req, res) => {
     try {
         const appointments = getallAppointments();
@@ -137,6 +169,7 @@ ap.put("/appointments/:id", (req, res) => {
         const { id } = req.params;
         const { UserID, DoctorID, HospitalID, AppointmentDate, Status } = req.body;
 
+<<<<<<< HEAD
         if (!UserID || !AppointmentDate) {
             return res.status(400).json({
                 error: "Missing required fields: UserID, AppointmentDate"
@@ -145,6 +178,17 @@ ap.put("/appointments/:id", (req, res) => {
 
         const appointmentStatus = Status || 'Pending';
         const result = updateAppointment(id, UserID, DoctorID || null, HospitalID || null, AppointmentDate, appointmentStatus);
+=======
+        if (!UserID || !DoctorID || !HospitalID || !AppointmentDate) {
+            return res.status(400).json({
+                error: "Missing required fields: UserID, DoctorID, HospitalID, AppointmentDate"
+            });
+        }
+
+        // Set default status if not provided
+        const appointmentStatus = Status || 'Pending';
+        const result = updateAppointment(id, UserID, DoctorID, HospitalID, AppointmentDate, appointmentStatus);
+>>>>>>> 1eba6a3741a38a4a94e36bc7cfd87cee2bf89b96
 
         if (result.changes === 0) {
             return res.status(404).json({ error: "Appointment not found" });
