@@ -1,6 +1,7 @@
 import db from "./db.js";
 
-async function createdisease(Name, description, symptoms, treatment, img) {
+
+async function createdisease(Name, description, treatment, img) {
     const query = db.prepare(
         "INSERT INTO diseases (Name, description, treatment, img) VALUES (?, ?, ?, ?)"
     );
@@ -21,12 +22,12 @@ async function createdisease(Name, description, symptoms, treatment, img) {
                     const insertSym = db.prepare("INSERT INTO symptoms (Name) VALUES (?)").run(sName);
                     symptomId = insertSym.lastInsertRowid;
                 }
-                
+
                 // Link
                 try {
                     db.prepare("INSERT OR IGNORE INTO symptomdiseases (SymptomID, DiseaseID) VALUES (?, ?)")
-                      .run(symptomId, diseaseId);
-                } catch(e) {}
+                        .run(symptomId, diseaseId);
+                } catch (e) { }
             }
         });
     }
@@ -81,12 +82,12 @@ function updatedisease(ID, Name, description, symptoms, treatment, img) {
             "UPDATE diseases SET Name = ?, description = ?, treatment = ?, img = ? WHERE ID = ?"
         );
         const result = query.run(Name, description ?? null, treatment ?? null, img ?? null, ID);
-        
+
         // Sync symptoms if passed
         if (symptoms !== undefined) {
             // Delete old links
             db.prepare("DELETE FROM symptomdiseases WHERE DiseaseID = ?").run(ID);
-            
+
             if (symptoms) {
                 const symptomsList = symptoms.split(",").map(s => s.trim());
                 symptomsList.forEach(sName => {
@@ -99,11 +100,11 @@ function updatedisease(ID, Name, description, symptoms, treatment, img) {
                             const insertSym = db.prepare("INSERT INTO symptoms (Name) VALUES (?)").run(sName);
                             symptomId = insertSym.lastInsertRowid;
                         }
-                        
+
                         try {
                             db.prepare("INSERT OR IGNORE INTO symptomdiseases (SymptomID, DiseaseID) VALUES (?, ?)")
-                              .run(symptomId, ID);
-                        } catch(e) {}
+                                .run(symptomId, ID);
+                        } catch (e) { }
                     }
                 });
             }
