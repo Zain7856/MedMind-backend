@@ -9,7 +9,7 @@ async function createDoctor(UserID, Name, Img, Specialization, Phone, Location, 
 }
 
 function getallDoctors() {
-    const query = db.prepare("SELECT * FROM doctors");
+    const query = db.prepare("SELECT * FROM doctors ");
     const result = query.all();
     return result;
 }
